@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AromaMind | 您的專屬芳療指南</title>
+    <meta name="description" content="依據症狀與心情，尋找最適合您的精油芳香療法。為您的身心帶來平衡與放鬆。">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="background-overlay"></div>
+    
+    <nav>
+        <div class="logo">AromaMind</div>
+    </nav>
+
+    <main>
+        <section id="hero">
+            <div class="hero-content">
+                <h1>找回身心的平衡</h1>
+                <p>依據您目前的症狀或心情，探索自然賦予的芳療能量。</p>
+                
+                <div class="zen-breathing-container">
+                    <div class="breathing-circle"></div>
+                    <div class="breathing-text">點擊開始呼吸練習</div>
+                </div>
+            </div>
+        </section>
+
+        <section id="controls">
+            <div class="selector-tabs">
+                <button class="tab-btn active" data-tab="moods">心情 (Moods)</button>
+                <button class="tab-btn" data-tab="symptoms">症狀 (Symptoms)</button>
+            </div>
+            
+            <div id="filter-container" class="filter-group">
+                <!-- Filters will be injected here by JS -->
+            </div>
+        </section>
+
+        <section id="results">
+            <div class="section-title">
+                <h2 id="result-heading">推薦精油</h2>
+            </div>
+            <div id="oil-grid" class="grid">
+                <!-- Oil cards will be injected here -->
+            </div>
+        </section>
+
+        <section id="recipes-section">
+            <div class="section-title">
+                <h2>經典複方配方</h2>
+            </div>
+            <div id="recipe-list" class="recipe-grid">
+                <!-- Recipes will be injected here -->
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 AromaMind. 芳香療法僅供參考，如有健康疑慮請諮詢專業醫療人員。</p>
+    </footer>
+
+    <!-- Modal for details -->
+    <div id="oil-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn">&times;</span>
+            <div id="modal-body">
+                <!-- Content injected here -->
+            </div>
+        </div>
+    </div>
+
+    <script src="data.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
