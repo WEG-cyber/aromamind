@@ -7,9 +7,24 @@ document.addEventListener('DOMContentLoaded', () => {
     const modalBody = document.getElementById('modal-body');
     const closeBtn = document.querySelector('.close-btn');
     const resultHeading = document.getElementById('result-heading');
+    const greeting = document.getElementById('greeting');
 
     let currentTab = 'moods';
     let activeFilter = null;
+
+    // --- LIFF Initialization ---
+    async function initLiff() {
+        try {
+            // 請將 'YOUR_LIFF_ID' 替換成您在 LINE Developers 取得的 LIFF ID
+            await liff.init({ liffId: "2009990334-b3WXj4PN" }); 
+            if (liff.isLoggedIn()) {
+                const profile = await liff.getProfile();
+                greeting.textContent = `嗨 ${profile.displayName}，找回身心的平衡`;
+            }
+        } catch (err) {
+            console.log('LIFF Initialization failed', err);
+        }
+    }
 
     // --- Initialization ---
     function init() {
@@ -17,6 +32,7 @@ document.addEventListener('DOMContentLoaded', () => {
         renderOils(aromaData.oils);
         renderRecipes();
         setupEventListeners();
+        initLiff();
     }
 
     // --- Rendering ---
@@ -135,9 +151,25 @@ document.addEventListener('DOMContentLoaded', () => {
                 <h4 style="color: #856404;">⚠️ 注意事項</h4>
                 <p style="color: #856404; font-size: 0.9rem;">${oil.caution}</p>
             </div>
+            <div style="margin-top: 2rem; text-align: center;">
+                <button id="liff-close-btn" class="filter-chip" style="display: inline-flex; width: auto; background: var(--primary); color: white; border: none;">
+                    完成並關閉視窗
+                </button>
+            </div>
         `;
         modal.style.display = 'block';
         document.body.style.overflow = 'hidden'; 
+
+        // Close LIFF window button
+        const liffCloseBtn = document.getElementById('liff-close-btn');
+        liffCloseBtn.addEventListener('click', () => {
+            if (liff.isInClient()) {
+                liff.closeWindow();
+            } else {
+                modal.style.display = 'none';
+                document.body.style.overflow = 'auto';
+            }
+        });
     }
 
     function setupEventListeners() {

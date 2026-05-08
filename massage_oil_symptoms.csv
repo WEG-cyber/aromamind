@@ -1,0 +1,13 @@
+id,name_zh,slug,description,category
+1,壓力與焦慮,stress_anxiety,情緒緊繃、壓力感、輕度焦慮情境,supportive_wellness
+2,睡眠困難,sleep_support,入睡前放鬆、睡前按摩儀式,supportive_wellness
+3,頭痛與頸肩緊繃,headache_neck_tension,緊繃型頭痛、肩頸壓力感,supportive_wellness
+4,肌肉痠痛,muscle_soreness,運動後或日常肌肉痠痛按摩,supportive_wellness
+5,關節僵硬,joint_stiffness,非急性關節僵硬與活動前後按摩,supportive_wellness
+6,消化不適,digestive_discomfort,腹部脹氣、消化不適的輕柔腹部按摩,supportive_wellness
+7,經期不適,menstrual_discomfort,經期腹部或下背部不適的外用按摩,supportive_wellness
+8,呼吸道悶塞感,respiratory_congestion,季節性鼻塞、胸口悶塞感的胸背按摩,supportive_wellness
+9,肌膚瑕疵,skin_blemish,背部、胸口或局部瑕疵肌膚護理,cosmetic_support
+10,疲勞與低落,fatigue_low_mood,精神疲憊、低落時的提振按摩,supportive_wellness
+11,冥想與安定,grounding_meditation,冥想、瑜伽後或睡前安定感,supportive_wellness
+12,足腿疲勞,tired_feet_legs,久站、久走後足部與小腿按摩,supportive_wellness
