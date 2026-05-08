@@ -35,6 +35,18 @@ def callback():
         abort(400)
     return 'OK'
 
+@app.route("/broadcast", methods=['GET'])
+def broadcast():
+    # 這是觸發定時發送的通道
+    try:
+        oil_tip = get_random_oil_tip()
+        message = TextSendMessage(text=f"☀️ 早安！今天的芳療小知識來了：\n\n{oil_tip}")
+        line_bot_api.broadcast(message)
+        return "Broadcast success!", 200
+    except Exception as e:
+        return f"Broadcast failed: {e}", 500
+
+
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
     user_text = event.message.text.lower()
