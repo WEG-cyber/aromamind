@@ -1,0 +1,15 @@
+name: Daily Aromatherapy Tip Broadcast
+
+on:
+  schedule:
+    # 每天早上 00:00 UTC (等於台灣時間早上 08:00)
+    - cron: '0 0 * * *'
+  workflow_dispatch: # 允許手動點擊執行測試
+
+jobs:
+  broadcast:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Broadcast URL
+        run: |
+          curl -X GET https://aromamind.onrender.com/broadcast
