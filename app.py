@@ -47,6 +47,17 @@ def broadcast():
         return f"Broadcast failed: {e}", 500
 
 
+@app.route("/remind_breathing", methods=['GET'])
+def remind_breathing():
+    # 下午三點的呼吸提醒
+    try:
+        message = TextSendMessage(text="🌬️ 下午三點了，休息一下吧！\n\n放下手邊的工作，花三分鐘跟著 AromaMind 進行一次深呼吸訓練，幫大腦重新開機。")
+        line_bot_api.broadcast(message)
+        return "Reminder success!", 200
+    except Exception as e:
+        return f"Reminder failed: {e}", 500
+
+
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
     user_text = event.message.text.lower()
