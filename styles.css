@@ -2,8 +2,9 @@
     --primary: #6d8c8e;
     --primary-light: #a3bcb6;
     --accent: #d4af37;
-    --text: #2c3e50;
-    --text-light: #5d6d7e;
+    --text: #ffffff;
+    --text-light: rgba(255, 255, 255, 0.8);
+    --text-dark: #2c3e50;
     --bg-light: #f8f9fa;
     --white: #ffffff;
     --glass: rgba(255, 255, 255, 0.4);
@@ -52,7 +53,7 @@ nav {
     font-family: 'Outfit', sans-serif;
     font-size: 2rem;
     font-weight: 600;
-    color: var(--primary);
+    color: var(--white);
     letter-spacing: 2px;
     text-transform: uppercase;
 }
@@ -192,7 +193,7 @@ main {
 .section-title h2 {
     font-size: 2rem;
     font-weight: 400;
-    color: var(--primary);
+    color: var(--white);
 }
 
 .grid {
@@ -238,7 +239,7 @@ main {
 
 .oil-card p {
     font-size: 0.95rem;
-    color: var(--text);
+    color: var(--text-dark);
     display: -webkit-box;
     -webkit-line-clamp: 3;
     -webkit-box-orient: vertical;
