@@ -6,8 +6,8 @@
     --text-light: #5d6d7e;
     --bg-light: #f8f9fa;
     --white: #ffffff;
-    --glass: rgba(255, 255, 255, 0.7);
-    --glass-border: rgba(255, 255, 255, 0.3);
+    --glass: rgba(255, 255, 255, 0.4);
+    --glass-border: rgba(255, 255, 255, 0.2);
     --shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
     --transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
 }
@@ -32,13 +32,13 @@ body {
     left: 0;
     width: 100%;
     height: 100vh;
-    background-image: linear-gradient(rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.8)), url('hero-bg.png');
+    background-image: url('hero-bg.png');
     background-size: cover;
     background-position: center;
     background-attachment: fixed;
     z-index: -1;
-    filter: blur(2px) grayscale(10%);
-    opacity: 0.6;
+    filter: none;
+    opacity: 0.9;
 }
 
 nav {
