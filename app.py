@@ -5,7 +5,12 @@ import google.generativeai as genai
 from flask import Flask, request, abort
 from linebot import LineBotApi, WebhookHandler
 from linebot.exceptions import InvalidSignatureError
-from linebot.models import MessageEvent, TextMessage, TextSendMessage, TemplateSendMessage, ButtonsTemplate, URITemplateAction
+from linebot.models import (
+    MessageEvent, TextMessage, TextSendMessage, 
+    TemplateSendMessage, ButtonsTemplate, URITemplateAction,
+    FlexSendMessage, BubbleContainer, ImageComponent, BoxComponent,
+    TextComponent, ButtonComponent, SpacerComponent
+)
 
 app = Flask(__name__)
 
@@ -14,6 +19,8 @@ LINE_CHANNEL_ACCESS_TOKEN = 'et9QpJnYAZureB5+wajvigSUbUJZ989aasP/vWn5O0ijAe3roZZ
 LINE_CHANNEL_SECRET = 'a8fb1a6810912ad9110a700e5a758272'
 GOOGLE_API_KEY = 'AIzaSyDz18zQV20BvoYzg1MSJjbMckFmNFKz1wQ'
 LIFF_URL = 'https://liff.line.me/2009990334-b3WXj4PN'
+# 預設背景圖 (使用您之前生成的禪風圖)
+DEFAULT_IMAGE_URL = 'https://weg-cyber.github.io/aromamind/line-square-1040.png'
 
 # 設定 Google Gemini
 genai.configure(api_key=GOOGLE_API_KEY)
@@ -41,10 +48,17 @@ def callback():
 @app.route("/broadcast", methods=['GET'])
 def broadcast():
     try:
-        oil_tip = get_random_oil_tip()
-        message = TextSendMessage(text=f"☀️ 早安！今天的芳療小知識來了：\n\n{oil_tip}")
-        line_bot_api.broadcast(message)
-        return "Broadcast success!", 200
+        if oils_df is not None:
+            row = oils_df.sample().iloc[0]
+            name_en = row['name_en']
+            name_zh = row.get('name_zh', name_en) # 如果有中文名就用，沒有就用英文
+            desc = row['description_summary']
+            
+            # 建立 Flex Message 圖卡
+            flex_message = create_oil_flex_card(name_zh, name_en, desc)
+            line_bot_api.broadcast(flex_message)
+            return "Broadcast success!", 200
+        return "No data to broadcast", 404
     except Exception as e:
         return f"Broadcast failed: {e}", 500
 
@@ -60,24 +74,10 @@ def remind_breathing():
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
     user_text = event.message.text
-    
-    # 建立系統提示詞 (System Prompt)
-    system_prompt = f"""
-    你是一位專業且溫暖的芳療師，名字叫 'AromaMind AI'。
-    你的任務是根據使用者的情緒或身體狀況推薦精油。
-    請遵循以下原則：
-    1. 語氣要親切、優雅、有禪意。
-    2. 如果使用者提到特定的症狀（如頭痛、失眠），請給予專業建議。
-    3. 在回答的最後，請鼓勵使用者開啟 AromaMind 網頁進行深呼吸。
-    4. 儘量保持簡短，適合在 LINE 上閱讀。
-    """
-    
+    system_prompt = f"你是一位專業且溫暖的芳療師，名字叫 'AromaMind AI'。語氣親切有禪意。最後請鼓勵使用者開啟 AromaMind 網頁進行深呼吸。網址是 {LIFF_URL}。"
     try:
-        # 使用 Gemini 產生回答
         response = model.generate_content(f"{system_prompt}\n\n使用者說：{user_text}")
         ai_reply = response.text.strip()
-        
-        # 傳送回答
         line_bot_api.reply_message(
             event.reply_token,
             [
@@ -95,13 +95,51 @@ def handle_message(event):
     except Exception as e:
         line_bot_api.reply_message(event.reply_token, TextSendMessage(text="抱歉，我的大腦正在冥想中，請稍後再試！"))
 
-def get_random_oil_tip():
-    if oils_df is not None:
-        row = oils_df.sample().iloc[0]
-        name = row['name_en']
-        desc = row['description_summary']
-        return f"🌟 精油名稱：{name}\n\n💡 簡介：{desc}\n\n希望這個知識對您有幫助！"
-    return "今天暫時沒有精油小知識，記得深呼吸哦！"
+def create_oil_flex_card(name_zh, name_en, desc):
+    bubble = BubbleContainer(
+        hero=ImageComponent(
+            url=DEFAULT_IMAGE_URL,
+            size='full',
+            aspect_ratio='20:13',
+            aspect_mode='cover',
+        ),
+        body=BoxComponent(
+            layout='vertical',
+            contents=[
+                TextComponent(text="🌿 今日精油推薦", weight='bold', color='#1DB446', size='sm'),
+                TextComponent(text=name_zh, weight='bold', size='xl', margin='md'),
+                TextComponent(text=name_en, size='xs', color='#aaaaaa', font_style='italic'),
+                BoxComponent(
+                    layout='vertical',
+                    margin='lg',
+                    spacing='sm',
+                    contents=[
+                        BoxComponent(
+                            layout='baseline',
+                            spacing='sm',
+                            contents=[
+                                TextComponent(text=desc, wrap=True, color='#666666', size='sm', flex=5)
+                            ]
+                        )
+                    ]
+                )
+            ]
+        ),
+        footer=BoxComponent(
+            layout='vertical',
+            spacing='sm',
+            contents=[
+                ButtonComponent(
+                    style='primary',
+                    height='sm',
+                    color='#8FB1A5',
+                    action=URITemplateAction(label='開啟 AromaMind 指南', uri=LIFF_URL)
+                ),
+                SpacerComponent(size='sm')
+            ]
+        )
+    )
+    return FlexSendMessage(alt_text=f"今日精油推薦：{name_zh}", contents=bubble)
 
 if __name__ == "__main__":
     app.run(port=5000)
