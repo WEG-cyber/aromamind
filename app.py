@@ -9,7 +9,7 @@ from linebot.models import (
     MessageEvent, TextMessage, TextSendMessage, 
     TemplateSendMessage, ButtonsTemplate, URITemplateAction,
     FlexSendMessage, BubbleContainer, ImageComponent, BoxComponent,
-    TextComponent, ButtonComponent, SpacerComponent
+    TextComponent, TextSendMessage, ButtonComponent
 )
 
 app = Flask(__name__)
@@ -134,8 +134,7 @@ def create_oil_flex_card(name_zh, name_en, desc):
                     height='sm',
                     color='#8FB1A5',
                     action=URITemplateAction(label='開啟 AromaMind 指南', uri=LIFF_URL)
-                ),
-                SpacerComponent(size='sm')
+                )
             ]
         )
     )
