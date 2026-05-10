@@ -138,24 +138,24 @@ document.addEventListener('DOMContentLoaded', () => {
             </div>
             
             <div class="detail-section">
-                <h4 style="font-size: 0.85rem; letter-spacing: 1px; color: var(--text-light); margin-bottom: 0.8rem;">🌿 療癒生活儀式</h4>
+                <h4 style="font-size: 0.85rem; letter-spacing: 1px; margin-bottom: 0.8rem;">🌿 療癒生活儀式</h4>
                 <div class="ritual-box" style="margin-bottom: 1.5rem;">${fullOilData.ritual}</div>
             </div>
             
             <div class="detail-section">
-                <h4 style="font-size: 0.85rem; letter-spacing: 1px; color: var(--text-light); margin-bottom: 0.8rem;">📖 關於此精油</h4>
+                <h4 style="font-size: 0.85rem; letter-spacing: 1px; margin-bottom: 0.8rem;">📖 關於此精油</h4>
                 <p style="color: var(--text-dark); line-height: 1.8; margin-bottom: 1.5rem;">${fullOilData.description}</p>
             </div>
             
             <div class="detail-section">
-                <h4 style="font-size: 0.85rem; letter-spacing: 1px; color: var(--text-light); margin-bottom: 0.8rem;">✨ 主要功效</h4>
+                <h4 style="font-size: 0.85rem; letter-spacing: 1px; margin-bottom: 0.8rem;">✨ 主要功效</h4>
                 <div class="benefit-list" style="margin-bottom: 1.5rem;">
                     ${fullOilData.benefits.map(b => `<span class="benefit-item">${b}</span>`).join('')}
                 </div>
             </div>
             
             <div class="detail-section">
-                <h4 style="font-size: 0.85rem; letter-spacing: 1px; color: var(--text-light); margin-bottom: 0.8rem;">💧 建議用法</h4>
+                <h4 style="font-size: 0.85rem; letter-spacing: 1px; margin-bottom: 0.8rem;">💧 建議用法</h4>
                 <p style="color: var(--text-dark); line-height: 1.8; margin-bottom: 1.5rem;">${fullOilData.usage}</p>
             </div>
             
