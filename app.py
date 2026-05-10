@@ -54,9 +54,7 @@ def broadcast():
             name_en = row['name_en']
             name_zh = row.get('name_zh', name_en)
             desc = row['description_summary']
-            
-            # 建立標準化 ID：轉小寫、去空格、去掉結尾的 oil
-            oil_id = name_en.lower().replace(" ", "").replace("oil", "")
+            oil_id = name_en.replace(" ", "") # 簡單的 ID 轉換
             
             # 建立帶有 Deep Link 的 Flex Message
             flex_message = create_oil_flex_card(name_zh, name_en, desc, oil_id)

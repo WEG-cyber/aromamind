@@ -132,74 +132,9 @@ const aromaData = {
         { id: "stress_anxiety", name: "壓力與焦慮", icon: "😟" },
         { id: "fatigue_low_mood", name: "疲勞與低落", icon: "🔋" },
         { id: "grounding_meditation", name: "冥想與安定", icon: "🧘" },
+        { id: "confusion", name: "思緒混亂 / 分心", icon: "🌀" },
+        { id: "sadness", name: "悲傷 / 難過", icon: "💧" },
         { id: "insomnia", name: "難以入睡", icon: "🌙" }
-    ],
-    oils: [
-        {
-            id: "lavender",
-            name: "薰衣草 (Lavender)",
-            scientificName: "Lavandula angustifolia",
-            description: "最廣為人知的精油，具有強大的鎮靜與舒緩力量。它是芳療界的『萬用油』。",
-            benefits: ["舒緩壓力", "改善睡眠", "緩解頭痛", "修復皮膚"],
-            moods: ["anxiety", "insomnia", "stress", "restless"],
-            symptoms: ["headache", "skin_irritation", "muscle_tension", "menstrual_discomfort"],
-            usage: "可直接滴於枕頭、加入擴香儀或稀釋後按摩太陽穴。",
-            ritual: "在睡前將一滴精油滴在枕頭角，閉上眼，想像每一根緊繃的肌肉都像溶化的雪水一樣流走。",
-            caution: "雖然溫和，但低血壓者使用過量可能導致倦怠。",
-            color: "#9b8dae"
-        },
-        {
-            id: "peppermint",
-            name: "歐薄荷 (Peppermint)",
-            scientificName: "Mentha piperita",
-            description: "清涼清爽的香氣，能瞬間提神醒腦，並緩解各種身體不適。",
-            benefits: ["提升專注力", "緩解鼻塞", "減輕噁心", "清涼止癢"],
-            moods: ["fatigue", "confusion", "low_energy"],
-            symptoms: ["headache", "nasal_congestion", "digestive_issues", "muscle_tension"],
-            usage: "適合日間擴香，或稀釋後塗抹於頸部後方提神。",
-            ritual: "將稀釋後的精油塗抹在太陽穴，逆時針輕揉，想像清涼的微風正帶走你腦中的迷霧。",
-            caution: "具有強烈清涼感，避開眼睛周圍；嬰幼兒、孕婦與蠶豆症患者應避免使用。",
-            color: "#7fb9a2"
-        },
-        {
-            id: "eucalyptus",
-            name: "尤加利 (Eucalyptus)",
-            scientificName: "Eucalyptus globulus",
-            description: "具有強勁的穿透力，是呼吸道的守護者，能淨化空氣並激發活力。",
-            benefits: ["淨化呼吸道", "提升免疫力", "清空思緒", "環境除臭"],
-            moods: ["mental_fog", "lethargy"],
-            symptoms: ["nasal_congestion", "cough", "cold_symptoms", "respiratory_congestion"],
-            usage: "最適合用於蒸氣吸入或擴香，幫助呼吸順暢。",
-            ritual: "滴在熱水中，用大毛巾蓋住頭部吸入蒸氣。每一次呼吸，都在淨化你的內在森林。",
-            caution: "不宜口服；幼童使用需選擇較溫和的澳洲尤加利。",
-            color: "#6d8c8e"
-        },
-        {
-            id: "tea_tree",
-            name: "茶樹 (Tea Tree)",
-            scientificName: "Melaleuca alternifolia",
-            description: "強效的天然防護劑，具有清新的木質香氣，是居家必備的淨化之星。",
-            benefits: ["天然抑菌", "平衡油脂", "提升防護力", "調理肌膚"],
-            moods: ["fatigue", "mental_fog"],
-            symptoms: ["skin_blemish", "skin_irritation", "cold_symptoms"],
-            usage: "點塗於痘痘處，或加入洗手乳中加強防護。",
-            ritual: "滴一滴在口罩扣或領口，想像一層純淨的防護罩正保護著你。",
-            caution: "雖然溫和，但大面積使用仍需稀釋。",
-            color: "#a3bcb6"
-        },
-        {
-            id: "clarysage",
-            name: "快樂鼠尾草 (Clary Sage)",
-            scientificName: "Salvia sclarea",
-            description: "具有獨特的堅果木質香氣，是著名的『女性精油』，能平衡情緒，帶來深層的放鬆感。",
-            benefits: ["平衡荷爾蒙", "緩解焦慮", "放鬆肌肉", "提升幸福感"],
-            moods: ["anxiety", "stress", "depression", "mood_swings"],
-            symptoms: ["menstrual_discomfort", "muscle_tension", "insomnia"],
-            usage: "適合擴香使用，或稀釋後輕輕按摩於腹部。",
-            ritual: "在溫暖的掌心中搓熱精油，深深吸氣。想像溫暖的月光正包圍著你，融化所有的不安。",
-            caution: "使用後應避免飲酒；懷孕期間請避免使用。",
-            color: "#8da3ae"
-        }
     ],
     recipes: [
         {
