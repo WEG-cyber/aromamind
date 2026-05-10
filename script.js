@@ -128,44 +128,44 @@ document.addEventListener('DOMContentLoaded', () => {
     function openModal(oil) {
         if (!oil) return;
         
-        // 確保抓取的是完整資料
-        const fullOilData = aromaData.oils.find(o => o.id === oil.id) || oil;
+        // 確保抓取的是完整資料，且不分大小寫
+        const fullOilData = aromaData.oils.find(o => o.id.toLowerCase() === oil.id.toLowerCase()) || oil;
         
         modalBody.innerHTML = `
             <div style="text-align: center; margin-bottom: 1.5rem;">
-                <h2 style="font-size: 2.2rem; margin-bottom: 0.2rem; color: var(--primary); text-shadow: none;">${fullOilData.name}</h2>
-                <div class="sci-name" style="text-shadow: none; margin-bottom: 1rem;">${fullOilData.scientificName}</div>
+                <h2 style="font-size: 2.2rem; margin-bottom: 0.2rem; color: #2c3e50 !important; text-shadow: none !important;">${fullOilData.name}</h2>
+                <div class="sci-name" style="color: #5d6d7e !important; text-shadow: none !important; margin-bottom: 1rem;">${fullOilData.scientificName}</div>
             </div>
             
             <div class="detail-section">
-                <h4 style="font-size: 0.85rem; letter-spacing: 1px; color: var(--text-light); margin-bottom: 0.8rem;">🌿 療癒生活儀式</h4>
-                <div class="ritual-box" style="margin-bottom: 1.5rem;">${fullOilData.ritual}</div>
+                <h4 style="font-size: 0.9rem; color: #6d8c8e !important; margin-bottom: 0.8rem; text-shadow: none !important;">🌿 療癒生活儀式</h4>
+                <div class="ritual-box" style="margin-bottom: 1.5rem; color: #2c3e50 !important; text-shadow: none !important;">${fullOilData.ritual}</div>
             </div>
             
             <div class="detail-section">
-                <h4 style="font-size: 0.85rem; letter-spacing: 1px; color: var(--text-light); margin-bottom: 0.8rem;">📖 關於此精油</h4>
-                <p style="color: var(--text-dark); line-height: 1.8; margin-bottom: 1.5rem;">${fullOilData.description}</p>
+                <h4 style="font-size: 0.9rem; color: #6d8c8e !important; margin-bottom: 0.8rem; text-shadow: none !important;">📖 關於此精油</h4>
+                <p style="color: #2c3e50 !important; line-height: 1.8; margin-bottom: 1.5rem; text-shadow: none !important;">${fullOilData.description}</p>
             </div>
             
             <div class="detail-section">
-                <h4 style="font-size: 0.85rem; letter-spacing: 1px; color: var(--text-light); margin-bottom: 0.8rem;">✨ 主要功效</h4>
+                <h4 style="font-size: 0.9rem; color: #6d8c8e !important; margin-bottom: 0.8rem; text-shadow: none !important;">✨ 主要功效</h4>
                 <div class="benefit-list" style="margin-bottom: 1.5rem;">
-                    ${fullOilData.benefits.map(b => `<span class="benefit-item">${b}</span>`).join('')}
+                    ${fullOilData.benefits.map(b => `<span class="benefit-item" style="text-shadow: none !important;">${b}</span>`).join('')}
                 </div>
             </div>
             
             <div class="detail-section">
-                <h4 style="font-size: 0.85rem; letter-spacing: 1px; color: var(--text-light); margin-bottom: 0.8rem;">💧 建議用法</h4>
-                <p style="color: var(--text-dark); line-height: 1.8; margin-bottom: 1.5rem;">${fullOilData.usage}</p>
+                <h4 style="font-size: 0.9rem; color: #6d8c8e !important; margin-bottom: 0.8rem; text-shadow: none !important;">💧 建議用法</h4>
+                <p style="color: #2c3e50 !important; line-height: 1.8; margin-bottom: 1.5rem; text-shadow: none !important;">${fullOilData.usage}</p>
             </div>
             
             <div class="detail-section" style="background: rgba(212, 175, 55, 0.05); padding: 1.2rem; border-radius: 16px; border: 1px solid rgba(212, 175, 55, 0.2);">
-                <h4 style="color: #856404; font-size: 0.85rem; margin-bottom: 0.5rem;">⚠️ 注意事項</h4>
-                <p style="color: #856404; font-size: 0.9rem; line-height: 1.6;">${fullOilData.caution}</p>
+                <h4 style="color: #856404 !important; font-size: 0.9rem; margin-bottom: 0.5rem; text-shadow: none !important;">⚠️ 注意事項</h4>
+                <p style="color: #856404 !important; font-size: 0.9rem; line-height: 1.6; text-shadow: none !important;">${fullOilData.caution}</p>
             </div>
             
             <div style="margin-top: 2rem; text-align: center;">
-                <button id="liff-close-btn" class="filter-chip" style="display: inline-flex; width: auto; background: var(--primary); color: white; border: none; padding: 0.8rem 2rem; border-radius: 50px; font-weight: 600; cursor: pointer;">
+                <button id="liff-close-btn" class="filter-chip" style="display: inline-flex; width: auto; background: #6d8c8e; color: white; border: none; padding: 0.8rem 2rem; border-radius: 50px; font-weight: 600; cursor: pointer;">
                     完成並關閉
                 </button>
             </div>
@@ -226,11 +226,17 @@ document.addEventListener('DOMContentLoaded', () => {
 // Deep Linking: Check URL parameters on load
 window.addEventListener('load', () => {
     const urlParams = new URLSearchParams(window.location.search);
-    const oilId = urlParams.get('oil');
-    if (oilId) {
+    const oilIdParam = urlParams.get('oil');
+    if (oilIdParam) {
+        // 標準化搜尋 ID：轉小寫、去掉結尾的 oil
+        const cleanId = oilIdParam.toLowerCase().replace("oil", "").trim();
+        
         // 等待資料完全加載後再執行
         setTimeout(() => {
-            const oil = aromaData.oils.find(o => o.id.toLowerCase() === oilId.toLowerCase());
+            const oil = aromaData.oils.find(o => 
+                o.id.toLowerCase() === cleanId || 
+                o.id.toLowerCase() === oilIdParam.toLowerCase()
+            );
             if (oil) openModal(oil);
         }, 800);
     }
