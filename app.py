@@ -49,16 +49,19 @@ def callback():
 
 def get_plant_image(name_en):
     try:
-        # 嘗試使用英文名稱或去除 'oil' 字眼的名稱搜尋維基百科
-        search_term = name_en.replace(' oil', '').replace(' Oil', '').strip()
+        # 去除 'oil' 字眼，並將空格改為底線（維基百科 URL 格式）
+        search_term = name_en.replace(' oil', '').replace(' Oil', '').strip().replace(' ', '_')
         url = f"https://en.wikipedia.org/api/rest_v1/page/summary/{search_term}"
-        response = requests.get(url, timeout=3)
+        response = requests.get(url, timeout=5)
         if response.status_code == 200:
             data = response.json()
-            if 'originalimage' in data and 'source' in data['originalimage']:
+            # 優先用原圖，如果沒有則用縮圖
+            if 'originalimage' in data:
                 return data['originalimage']['source']
-    except Exception:
-        pass
+            elif 'thumbnail' in data:
+                return data['thumbnail']['source']
+    except Exception as e:
+        print(f"Wikipedia image fetch failed for {name_en}: {e}")
     return DEFAULT_IMAGE_URL
 
 @app.route("/broadcast", methods=['GET'])
@@ -67,7 +70,8 @@ def broadcast():
         if oils_df is not None:
             row = oils_df.sample().iloc[0]
             name_en = row['name_en']
-            name_zh = row.get('name_zh', name_en)
+            # pandas Series 沒有 .get() 方法，需要用 in 判斷
+            name_zh = row['name_en']  # CSV 沒有 name_zh 欄位，直接用英文
             desc = row['description_summary']
             oil_id = name_en.replace(" ", "") # 簡單的 ID 轉換
             
