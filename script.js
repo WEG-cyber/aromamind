@@ -210,3 +210,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
     init();
 });
+
+// Deep Linking: Check URL parameters on load
+window.addEventListener('load', () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const oilId = urlParams.get('oil');
+    if (oilId) {
+        // 等待資料加載與卡片生成後再開啟彈窗
+        setTimeout(() => {
+            if (typeof oils !== 'undefined' && oils.length > 0) {
+                const oil = oils.find(o => o.id.toLowerCase() === oilId.toLowerCase());
+                if (oil) showOilDetails(oil);
+            }
+        }, 1200);
+    }
+});

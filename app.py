@@ -9,7 +9,7 @@ from linebot.models import (
     MessageEvent, TextMessage, TextSendMessage, 
     TemplateSendMessage, ButtonsTemplate, URITemplateAction,
     FlexSendMessage, BubbleContainer, ImageComponent, BoxComponent,
-    TextComponent, TextSendMessage, ButtonComponent
+    TextComponent, ButtonComponent
 )
 
 app = Flask(__name__)
@@ -18,8 +18,7 @@ app = Flask(__name__)
 LINE_CHANNEL_ACCESS_TOKEN = 'et9QpJnYAZureB5+wajvigSUbUJZ989aasP/vWn5O0ijAe3roZZ3ptcy7QaYSGCKVL+cwmBLJSHS2gHNqxMRIGogZ31tdRQ61NMRn8yMVrZU8nhw2ibkExvev2rq/B0XCk+LpCzEWBMdFzxgXvzztgdB04t89/1O/w1cDnyilFU='
 LINE_CHANNEL_SECRET = 'a8fb1a6810912ad9110a700e5a758272'
 GOOGLE_API_KEY = 'AIzaSyDz18zQV20BvoYzg1MSJjbMckFmNFKz1wQ'
-LIFF_URL = 'https://liff.line.me/2009990334-b3WXj4PN'
-# 預設背景圖 (使用您之前生成的禪風圖)
+BASE_LIFF_URL = 'https://liff.line.me/2009990334-b3WXj4PN'
 DEFAULT_IMAGE_URL = 'https://weg-cyber.github.io/aromamind/line-square-1040.png'
 
 # 設定 Google Gemini
@@ -51,21 +50,22 @@ def broadcast():
         if oils_df is not None:
             row = oils_df.sample().iloc[0]
             name_en = row['name_en']
-            name_zh = row.get('name_zh', name_en) # 如果有中文名就用，沒有就用英文
+            name_zh = row.get('name_zh', name_en)
             desc = row['description_summary']
+            oil_id = name_en.replace(" ", "") # 簡單的 ID 轉換
             
-            # 建立 Flex Message 圖卡
-            flex_message = create_oil_flex_card(name_zh, name_en, desc)
+            # 建立帶有 Deep Link 的 Flex Message
+            flex_message = create_oil_flex_card(name_zh, name_en, desc, oil_id)
             line_bot_api.broadcast(flex_message)
             return "Broadcast success!", 200
-        return "No data to broadcast", 404
+        return "No data", 404
     except Exception as e:
         return f"Broadcast failed: {e}", 500
 
 @app.route("/remind_breathing", methods=['GET'])
 def remind_breathing():
     try:
-        message = TextSendMessage(text="🌬️ 下午三點了，休息一下吧！\n\n放下手邊的工作，花三分鐘跟著 AromaMind 進行一次深呼吸訓練，幫大腦重新開機。")
+        message = TextSendMessage(text="🌬️ 下午三點了，休息一下吧！\n\n放下手邊的工作，花三分鐘跟著 AromaMind 進行一次深呼吸訓練。")
         line_bot_api.broadcast(message)
         return "Reminder success!", 200
     except Exception as e:
@@ -74,7 +74,13 @@ def remind_breathing():
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
     user_text = event.message.text
-    system_prompt = f"你是一位專業且溫暖的芳療師，名字叫 'AromaMind AI'。語氣親切有禪意。最後請鼓勵使用者開啟 AromaMind 網頁進行深呼吸。網址是 {LIFF_URL}。"
+    system_prompt = f"""
+    你是一位專業芳療師 AromaMind AI。
+    1. 語氣溫暖有禪意。
+    2. 當你推薦特定精油時，請在最後附上專屬連結。
+    3. 連結格式為: {BASE_LIFF_URL}/?oil=[精油英文名稱]
+    4. 範例：如果您推薦薰衣草，請附上 {BASE_LIFF_URL}/?oil=Lavender
+    """
     try:
         response = model.generate_content(f"{system_prompt}\n\n使用者說：{user_text}")
         ai_reply = response.text.strip()
@@ -86,16 +92,19 @@ def handle_message(event):
                     alt_text='開啟 AromaMind 指南',
                     template=ButtonsTemplate(
                         title='AromaMind 芳療建議',
-                        text='您可以開啟指南查看詳細按摩手法',
-                        actions=[URITemplateAction(label='開啟深呼吸與指南', uri=LIFF_URL)]
+                        text='點擊下方開啟深呼吸與詳細介紹',
+                        actions=[URITemplateAction(label='立即開啟', uri=BASE_LIFF_URL)]
                     )
                 )
             ]
         )
     except Exception as e:
-        line_bot_api.reply_message(event.reply_token, TextSendMessage(text="抱歉，我的大腦正在冥想中，請稍後再試！"))
+        line_bot_api.reply_message(event.reply_token, TextSendMessage(text="抱歉，我的大腦正在冥想中..."))
 
-def create_oil_flex_card(name_zh, name_en, desc):
+def create_oil_flex_card(name_zh, name_en, desc, oil_id):
+    # 建立 Deep Link URL
+    deep_link = f"{BASE_LIFF_URL}/?oil={oil_id}"
+    
     bubble = BubbleContainer(
         hero=ImageComponent(
             url=DEFAULT_IMAGE_URL,
@@ -114,13 +123,7 @@ def create_oil_flex_card(name_zh, name_en, desc):
                     margin='lg',
                     spacing='sm',
                     contents=[
-                        BoxComponent(
-                            layout='baseline',
-                            spacing='sm',
-                            contents=[
-                                TextComponent(text=desc, wrap=True, color='#666666', size='sm', flex=5)
-                            ]
-                        )
+                        TextComponent(text=desc, wrap=True, color='#666666', size='sm')
                     ]
                 )
             ]
@@ -133,7 +136,7 @@ def create_oil_flex_card(name_zh, name_en, desc):
                     style='primary',
                     height='sm',
                     color='#8FB1A5',
-                    action=URITemplateAction(label='開啟 AromaMind 指南', uri=LIFF_URL)
+                    action=URITemplateAction(label='查看詳細介紹', uri=deep_link)
                 )
             ]
         )
