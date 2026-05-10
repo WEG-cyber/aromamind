@@ -1,4 +1,5 @@
 import os
+import requests
 import pandas as pd
 import random
 import google.generativeai as genai
@@ -46,6 +47,20 @@ def callback():
         abort(400)
     return 'OK'
 
+def get_plant_image(name_en):
+    try:
+        # 嘗試使用英文名稱或去除 'oil' 字眼的名稱搜尋維基百科
+        search_term = name_en.replace(' oil', '').replace(' Oil', '').strip()
+        url = f"https://en.wikipedia.org/api/rest_v1/page/summary/{search_term}"
+        response = requests.get(url, timeout=3)
+        if response.status_code == 200:
+            data = response.json()
+            if 'originalimage' in data and 'source' in data['originalimage']:
+                return data['originalimage']['source']
+    except Exception:
+        pass
+    return DEFAULT_IMAGE_URL
+
 @app.route("/broadcast", methods=['GET'])
 def broadcast():
     try:
@@ -56,8 +71,11 @@ def broadcast():
             desc = row['description_summary']
             oil_id = name_en.replace(" ", "") # 簡單的 ID 轉換
             
+            # 動態抓取植物圖片
+            image_url = get_plant_image(name_en)
+            
             # 建立帶有 Deep Link 的 Flex Message
-            flex_message = create_oil_flex_card(name_zh, name_en, desc, oil_id)
+            flex_message = create_oil_flex_card(name_zh, name_en, desc, oil_id, image_url)
             line_bot_api.broadcast(flex_message)
             return "Broadcast success!", 200
         return "No data", 404
@@ -103,13 +121,13 @@ def handle_message(event):
     except Exception as e:
         line_bot_api.reply_message(event.reply_token, TextSendMessage(text="抱歉，我的大腦正在冥想中..."))
 
-def create_oil_flex_card(name_zh, name_en, desc, oil_id):
+def create_oil_flex_card(name_zh, name_en, desc, oil_id, image_url=DEFAULT_IMAGE_URL):
     # 建立 Deep Link URL 並強制外部開啟
     deep_link = f"{SITE_URL}?oil={oil_id}&openExternalBrowser=1"
     
     bubble = BubbleContainer(
         hero=ImageComponent(
-            url=DEFAULT_IMAGE_URL,
+            url=image_url,
             size='full',
             aspect_ratio='20:13',
             aspect_mode='cover',
