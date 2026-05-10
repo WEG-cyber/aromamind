@@ -19,6 +19,8 @@ LINE_CHANNEL_ACCESS_TOKEN = 'et9QpJnYAZureB5+wajvigSUbUJZ989aasP/vWn5O0ijAe3roZZ
 LINE_CHANNEL_SECRET = 'a8fb1a6810912ad9110a700e5a758272'
 GOOGLE_API_KEY = 'AIzaSyDz18zQV20BvoYzg1MSJjbMckFmNFKz1wQ'
 BASE_LIFF_URL = 'https://liff.line.me/2009990334-b3WXj4PN'
+# 為了開啟外部瀏覽器，我們直接連結到 GitHub Pages 網址並加上參數
+SITE_URL = 'https://weg-cyber.github.io/aromamind/'
 DEFAULT_IMAGE_URL = 'https://weg-cyber.github.io/aromamind/line-square-1040.png'
 
 # 設定 Google Gemini
@@ -78,8 +80,8 @@ def handle_message(event):
     你是一位專業芳療師 AromaMind AI。
     1. 語氣溫暖有禪意。
     2. 當你推薦特定精油時，請在最後附上專屬連結。
-    3. 連結格式為: {BASE_LIFF_URL}/?oil=[精油英文名稱]
-    4. 範例：如果您推薦薰衣草，請附上 {BASE_LIFF_URL}/?oil=Lavender
+    3. 連結格式為: {SITE_URL}?oil=[精油英文名稱]&openExternalBrowser=1
+    4. 範例：如果您推薦薰衣草，請附上 {SITE_URL}?oil=Lavender&openExternalBrowser=1
     """
     try:
         response = model.generate_content(f"{system_prompt}\n\n使用者說：{user_text}")
@@ -93,7 +95,7 @@ def handle_message(event):
                     template=ButtonsTemplate(
                         title='AromaMind 芳療建議',
                         text='點擊下方開啟深呼吸與詳細介紹',
-                        actions=[URITemplateAction(label='立即開啟', uri=BASE_LIFF_URL)]
+                        actions=[URITemplateAction(label='立即開啟', uri=f"{SITE_URL}?openExternalBrowser=1")]
                     )
                 )
             ]
@@ -102,8 +104,8 @@ def handle_message(event):
         line_bot_api.reply_message(event.reply_token, TextSendMessage(text="抱歉，我的大腦正在冥想中..."))
 
 def create_oil_flex_card(name_zh, name_en, desc, oil_id):
-    # 建立 Deep Link URL
-    deep_link = f"{BASE_LIFF_URL}/?oil={oil_id}"
+    # 建立 Deep Link URL 並強制外部開啟
+    deep_link = f"{SITE_URL}?oil={oil_id}&openExternalBrowser=1"
     
     bubble = BubbleContainer(
         hero=ImageComponent(
