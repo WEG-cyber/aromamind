@@ -101,7 +101,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <ul>
                     ${recipe.oils.map(oil => `<li>• ${oil}</li>`).join('')}
                 </ul>
-                <p style="font-size: 0.85rem; color: var(--text-light);">${recipe.description}</p>
+                <p style="font-size: 0.85rem; line-height: 1.6; color: #000000;">${recipe.description}</p>
             `;
             recipeList.appendChild(card);
         });
