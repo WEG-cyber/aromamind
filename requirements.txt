@@ -3,3 +3,4 @@ line-bot-sdk
 pandas
 gunicorn
 google-generativeai
+requests
