@@ -342,6 +342,7 @@ main {
     font-size: 2.5rem;
     margin-bottom: 0.5rem;
     color: var(--primary);
+    text-shadow: none; /* 移除白底上的陰影，防止模糊 */
 }
 
 #modal-body .sci-name {
@@ -349,6 +350,7 @@ main {
     font-style: italic;
     color: var(--text-light);
     margin-bottom: 2rem;
+    text-shadow: none;
 }
 
 #modal-body .detail-section {
@@ -382,10 +384,12 @@ main {
 }
 
 .benefit-item {
-    background: var(--bg-light);
+    background: rgba(109, 140, 142, 0.1); /* 莫蘭迪綠背景 */
+    color: var(--primary); /* 深綠文字 */
     padding: 8px 16px;
-    border-radius: 8px;
+    border-radius: 20px;
     font-size: 0.9rem;
+    font-weight: 500;
 }
 
 /* Animations */
@@ -408,5 +412,9 @@ footer {
 
 @media (max-width: 768px) {
     #hero h1 { font-size: 2.5rem; }
-    .modal-content { padding: 2rem; margin: 10% auto; }
+    .modal-content { 
+        padding: 1.5rem; 
+        margin: 5% auto; 
+        width: 95%;
+    }
 }
