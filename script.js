@@ -222,21 +222,22 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     init();
-});
-// Deep Linking: Check URL parameters on load
-window.addEventListener('load', () => {
-    const urlParams = new URLSearchParams(window.location.search);
-    let oilId = urlParams.get('oil');
-    if (oilId) {
-        // 優化搜尋邏輯：去掉空白與特殊字元，並轉為小寫
-        const cleanId = oilId.replace(/\s/g, '').toLowerCase();
-        
-        setTimeout(() => {
-            const oil = aromaData.oils.find(o => 
-                o.id.toLowerCase().replace(/_/g, '') === cleanId || 
-                o.name.toLowerCase().replace(/\s/g, '').includes(cleanId)
-            );
-            if (oil) openModal(oil);
-        }, 800);
-    }
+
+    // Deep Linking: Check URL parameters on load
+    window.addEventListener('load', () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        let oilId = urlParams.get('oil');
+        if (oilId) {
+            // 優化搜尋邏輯：去掉空白與特殊字元，並轉為小寫
+            const cleanId = oilId.replace(/\s/g, '').toLowerCase();
+            
+            setTimeout(() => {
+                const oil = aromaData.oils.find(o => 
+                    o.id.toLowerCase().replace(/_/g, '') === cleanId || 
+                    o.name.toLowerCase().replace(/\s/g, '').includes(cleanId)
+                );
+                if (oil) openModal(oil);
+            }, 800);
+        }
+    });
 });
