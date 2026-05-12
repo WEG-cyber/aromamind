@@ -2,15 +2,14 @@ import os
 import requests
 import pandas as pd
 import random
+import json
 import google.generativeai as genai
 from flask import Flask, request, abort
 from linebot import LineBotApi, WebhookHandler
 from linebot.exceptions import InvalidSignatureError
 from linebot.models import (
-    MessageEvent, TextMessage, TextSendMessage, 
-    TemplateSendMessage, ButtonsTemplate, URITemplateAction,
-    FlexSendMessage, BubbleContainer, ImageComponent, BoxComponent,
-    TextComponent, ButtonComponent
+    MessageEvent, TextMessage, TextSendMessage,
+    FlexSendMessage
 )
 
 app = Flask(__name__)
@@ -19,8 +18,6 @@ app = Flask(__name__)
 LINE_CHANNEL_ACCESS_TOKEN = 'et9QpJnYAZureB5+wajvigSUbUJZ989aasP/vWn5O0ijAe3roZZ3ptcy7QaYSGCKVL+cwmBLJSHS2gHNqxMRIGogZ31tdRQ61NMRn8yMVrZU8nhw2ibkExvev2rq/B0XCk+LpCzEWBMdFzxgXvzztgdB04t89/1O/w1cDnyilFU='
 LINE_CHANNEL_SECRET = 'a8fb1a6810912ad9110a700e5a758272'
 GOOGLE_API_KEY = 'AIzaSyDz18zQV20BvoYzg1MSJjbMckFmNFKz1wQ'
-BASE_LIFF_URL = 'https://liff.line.me/2009990334-b3WXj4PN'
-# 為了開啟外部瀏覽器，我們直接連結到 GitHub Pages 網址並加上參數
 SITE_URL = 'https://weg-cyber.github.io/aromamind/'
 DEFAULT_IMAGE_URL = 'https://weg-cyber.github.io/aromamind/line-square-1040.png'
 
@@ -34,8 +31,10 @@ handler = WebhookHandler(LINE_CHANNEL_SECRET)
 # 載入精油資料
 try:
     oils_df = pd.read_csv('all_essential_oils.csv')
+    print(f"Loaded {len(oils_df)} oils from CSV")
 except Exception as e:
     oils_df = None
+    print(f"Failed to load CSV: {e}")
 
 @app.route("/callback", methods=['POST'])
 def callback():
@@ -49,13 +48,11 @@ def callback():
 
 def get_plant_image(name_en):
     try:
-        # 去除 'oil' 字眼，並將空格改為底線（維基百科 URL 格式）
         search_term = name_en.replace(' oil', '').replace(' Oil', '').strip().replace(' ', '_')
         url = f"https://en.wikipedia.org/api/rest_v1/page/summary/{search_term}"
         response = requests.get(url, timeout=5)
         if response.status_code == 200:
             data = response.json()
-            # 優先用原圖，如果沒有則用縮圖
             if 'originalimage' in data:
                 return data['originalimage']['source']
             elif 'thumbnail' in data:
@@ -64,27 +61,168 @@ def get_plant_image(name_en):
         print(f"Wikipedia image fetch failed for {name_en}: {e}")
     return DEFAULT_IMAGE_URL
 
+def create_oil_info_card(row):
+    """
+    仿照截圖中的「訂房紀錄」卡片格式，
+    直接在 LINE 裡顯示精油的完整資料。
+    """
+    name_en = str(row.get('name_en', '未知精油'))
+    oil_type = str(row.get('oil_type', ''))
+    botanical = str(row.get('botanical_names', ''))
+    desc = str(row.get('description_summary', ''))
+    use_cat = str(row.get('use_categories', ''))
+    safety = str(row.get('safety_flags', ''))
+    image_url = get_plant_image(name_en)
+
+    # 截斷過長的描述 (LINE 有字數限制)
+    if len(desc) > 120:
+        desc = desc[:117] + '...'
+
+    # 構建資訊列（只顯示有值的欄位）
+    info_rows = []
+
+    if botanical and botanical not in ['', 'nan']:
+        info_rows.append({
+            "type": "box",
+            "layout": "horizontal",
+            "contents": [
+                {"type": "text", "text": "🌱 學名", "size": "sm", "color": "#888888", "flex": 2},
+                {"type": "text", "text": botanical, "size": "sm", "color": "#333333", "flex": 5, "wrap": True}
+            ],
+            "margin": "sm"
+        })
+
+    if oil_type and oil_type not in ['', 'nan']:
+        info_rows.append({
+            "type": "box",
+            "layout": "horizontal",
+            "contents": [
+                {"type": "text", "text": "🧴 類型", "size": "sm", "color": "#888888", "flex": 2},
+                {"type": "text", "text": oil_type, "size": "sm", "color": "#333333", "flex": 5, "wrap": True}
+            ],
+            "margin": "sm"
+        })
+
+    if use_cat and use_cat not in ['', 'nan']:
+        info_rows.append({
+            "type": "box",
+            "layout": "horizontal",
+            "contents": [
+                {"type": "text", "text": "✨ 用途", "size": "sm", "color": "#888888", "flex": 2},
+                {"type": "text", "text": use_cat, "size": "sm", "color": "#333333", "flex": 5, "wrap": True}
+            ],
+            "margin": "sm"
+        })
+
+    if safety and safety not in ['', 'nan', '0']:
+        info_rows.append({
+            "type": "box",
+            "layout": "horizontal",
+            "contents": [
+                {"type": "text", "text": "⚠️ 注意", "size": "sm", "color": "#888888", "flex": 2},
+                {"type": "text", "text": safety, "size": "sm", "color": "#c0392b", "flex": 5, "wrap": True}
+            ],
+            "margin": "sm"
+        })
+
+    # 使用原生 dict 格式構建 Flex Message（更靈活）
+    flex_body = {
+        "type": "bubble",
+        "hero": {
+            "type": "image",
+            "url": image_url,
+            "size": "full",
+            "aspectRatio": "20:13",
+            "aspectMode": "cover"
+        },
+        "header": {
+            "type": "box",
+            "layout": "vertical",
+            "contents": [
+                {
+                    "type": "box",
+                    "layout": "horizontal",
+                    "contents": [
+                        {
+                            "type": "text",
+                            "text": "🌿 今日精油推薦",
+                            "size": "xs",
+                            "color": "#6d8c8e",
+                            "weight": "bold"
+                        }
+                    ]
+                },
+                {
+                    "type": "text",
+                    "text": name_en,
+                    "size": "xl",
+                    "weight": "bold",
+                    "color": "#1a1a1a",
+                    "margin": "sm"
+                }
+            ],
+            "paddingAll": "15px",
+            "backgroundColor": "#ffffff"
+        },
+        "body": {
+            "type": "box",
+            "layout": "vertical",
+            "contents": [
+                {
+                    "type": "text",
+                    "text": desc if desc and desc not in ['nan', ''] else "今日為您精選的芳療精油",
+                    "size": "sm",
+                    "color": "#555555",
+                    "wrap": True,
+                    "margin": "none"
+                },
+                {
+                    "type": "separator",
+                    "margin": "md",
+                    "color": "#eeeeee"
+                }
+            ] + info_rows,
+            "paddingAll": "15px",
+            "backgroundColor": "#ffffff"
+        },
+        "footer": {
+            "type": "box",
+            "layout": "vertical",
+            "contents": [
+                {
+                    "type": "button",
+                    "action": {
+                        "type": "uri",
+                        "label": "🌐 開啟 AromaMind 網站",
+                        "uri": f"{SITE_URL}?openExternalBrowser=1"
+                    },
+                    "style": "primary",
+                    "color": "#6d8c8e",
+                    "height": "sm"
+                }
+            ],
+            "paddingAll": "12px",
+            "backgroundColor": "#f8f9fa"
+        }
+    }
+
+    return FlexSendMessage(
+        alt_text=f"🌿 今日精油推薦：{name_en}",
+        contents=flex_body
+    )
+
 @app.route("/broadcast", methods=['GET'])
 def broadcast():
     try:
         if oils_df is not None:
             row = oils_df.sample().iloc[0]
-            name_en = row['name_en']
-            # pandas Series 沒有 .get() 方法，需要用 in 判斷
-            name_zh = row['name_en']  # CSV 沒有 name_zh 欄位，直接用英文
-            desc = row['description_summary']
-            oil_id = name_en.replace(" ", "") # 簡單的 ID 轉換
-            
-            # 動態抓取植物圖片
-            image_url = get_plant_image(name_en)
-            
-            # 建立帶有 Deep Link 的 Flex Message
-            flex_message = create_oil_flex_card(name_zh, name_en, desc, oil_id, image_url)
+            flex_message = create_oil_info_card(row)
             line_bot_api.broadcast(flex_message)
-            return "Broadcast success!", 200
+            return f"Broadcast success! Oil: {row['name_en']}", 200
         return "No data", 404
     except Exception as e:
-        return f"Broadcast failed: {e}", 500
+        import traceback
+        return f"Broadcast failed: {e}\n{traceback.format_exc()}", 500
 
 @app.route("/remind_breathing", methods=['GET'])
 def remind_breathing():
@@ -103,69 +241,16 @@ def handle_message(event):
     1. 語氣溫暖有禪意。
     2. 當你推薦特定精油時，請在最後附上專屬連結。
     3. 連結格式為: {SITE_URL}?oil=[精油英文名稱]&openExternalBrowser=1
-    4. 範例：如果您推薦薰衣草，請附上 {SITE_URL}?oil=Lavender&openExternalBrowser=1
     """
     try:
         response = model.generate_content(f"{system_prompt}\n\n使用者說：{user_text}")
         ai_reply = response.text.strip()
         line_bot_api.reply_message(
             event.reply_token,
-            [
-                TextSendMessage(text=ai_reply),
-                TemplateSendMessage(
-                    alt_text='開啟 AromaMind 指南',
-                    template=ButtonsTemplate(
-                        title='AromaMind 芳療建議',
-                        text='點擊下方開啟深呼吸與詳細介紹',
-                        actions=[URITemplateAction(label='立即開啟', uri=f"{SITE_URL}?openExternalBrowser=1")]
-                    )
-                )
-            ]
+            TextSendMessage(text=ai_reply)
         )
     except Exception as e:
         line_bot_api.reply_message(event.reply_token, TextSendMessage(text="抱歉，我的大腦正在冥想中..."))
-
-def create_oil_flex_card(name_zh, name_en, desc, oil_id, image_url=DEFAULT_IMAGE_URL):
-    # 建立 Deep Link URL 並強制外部開啟
-    deep_link = f"{SITE_URL}?oil={oil_id}&openExternalBrowser=1"
-    
-    bubble = BubbleContainer(
-        hero=ImageComponent(
-            url=image_url,
-            size='full',
-            aspect_ratio='20:13',
-            aspect_mode='cover',
-        ),
-        body=BoxComponent(
-            layout='vertical',
-            contents=[
-                TextComponent(text="🌿 今日精油推薦", weight='bold', color='#1DB446', size='sm'),
-                TextComponent(text=name_zh, weight='bold', size='xl', margin='md'),
-                TextComponent(text=name_en, size='xs', color='#aaaaaa', font_style='italic'),
-                BoxComponent(
-                    layout='vertical',
-                    margin='lg',
-                    spacing='sm',
-                    contents=[
-                        TextComponent(text=desc, wrap=True, color='#666666', size='sm')
-                    ]
-                )
-            ]
-        ),
-        footer=BoxComponent(
-            layout='vertical',
-            spacing='sm',
-            contents=[
-                ButtonComponent(
-                    style='primary',
-                    height='sm',
-                    color='#8FB1A5',
-                    action=URITemplateAction(label='查看詳細介紹', uri=deep_link)
-                )
-            ]
-        )
-    )
-    return FlexSendMessage(alt_text=f"今日精油推薦：{name_zh}", contents=bubble)
 
 if __name__ == "__main__":
     app.run(port=5000)
