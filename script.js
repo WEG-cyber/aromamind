@@ -224,16 +224,49 @@ document.addEventListener('DOMContentLoaded', () => {
     init();
 
     // Deep Linking: Check URL parameters
+    function normalizeOilKey(value) {
+        return decodeURIComponent(value || '')
+            .toLowerCase()
+            .replace(/精油/g, '')
+            .replace(/\boil\b/g, '')
+            .replace(/[()（）\s_-]/g, '')
+            .trim();
+    }
+
+    const oilAliases = {
+        lavender: 'lavender',
+        薰衣草: 'lavender',
+        peppermint: 'peppermint',
+        歐薄荷: 'peppermint',
+        薄荷: 'peppermint',
+        eucalyptus: 'eucalyptus',
+        尤加利: 'eucalyptus',
+        teatree: 'tea_tree',
+        茶樹: 'tea_tree',
+        bergamot: 'bergamot',
+        佛手柑: 'bergamot',
+        frankincense: 'frankincense',
+        乳香: 'frankincense',
+        clarysage: 'clary_sage',
+        快樂鼠尾草: 'clary_sage',
+        sweetorange: 'sweet_orange',
+        orange: 'sweet_orange',
+        甜橙: 'sweet_orange',
+        rosemary: 'rosemary',
+        迷迭香: 'rosemary'
+    };
+
     const urlParams = new URLSearchParams(window.location.search);
     let oilId = urlParams.get('oil');
     if (oilId) {
-        // 優化搜尋邏輯：去掉空白與特殊字元，並轉為小寫
-        const cleanId = oilId.replace(/\s/g, '').toLowerCase();
+        const cleanId = normalizeOilKey(oilId);
+        const targetId = oilAliases[cleanId] || oilId;
         
         setTimeout(() => {
             const oil = aromaData.oils.find(o => 
-                o.id.toLowerCase().replace(/_/g, '') === cleanId || 
-                o.name.toLowerCase().replace(/\s/g, '').includes(cleanId)
+                o.id === targetId ||
+                normalizeOilKey(o.id) === cleanId ||
+                normalizeOilKey(o.name).includes(cleanId)
             );
             if (oil) openModal(oil);
         }, 500); // 縮短等待時間至 500ms，體驗更流暢
